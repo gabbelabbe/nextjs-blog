@@ -1,13 +1,14 @@
 import { BarChart, XAxis, YAxis, Bar, Tooltip, ResponsiveContainer, Cell, Legend } from 'recharts'
 import Layout from '../components/layout'
+import { getGithubData } from '../lib/github'
 
-export default function Chart() {
+export default function Chart({ postData }) {
 
   return (
     <Layout>
       <div style={{ height: 500 }}>
         <ResponsiveContainer height='100%' width='100%'>
-          <BarChart data={[{name: 'js', value: 10}, {name: 'ts', value: 5}, {name: 'ruby', value: 3}, {name: 'java', value: 0}]} cursor='pointer'>
+          <BarChart data={postData} cursor='pointer'>
             <XAxis dataKey='name' />
             <YAxis />
             <Legend height={25} iconSize={0} />
@@ -19,4 +20,24 @@ export default function Chart() {
       </div>
     </Layout>
   )
+}
+
+export async function getStaticProps() {
+  const githubData = await getGithubData()
+  const postData = []
+  githubData.forEach((data) => {
+    if (data.language) {
+      const i = postData.findIndex(val => val.name === data.language)
+      if (i !== -1) {
+        postData[i].value += 1
+      } else {
+        postData.push({name: data.language, value: 1})
+      }
+    }
+  })
+  return {
+    props: {
+      postData
+    }
+  }
 }
